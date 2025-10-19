@@ -372,7 +372,7 @@ function Kavo.CreateLib(kavName, themeList)
 
     function Tabs:NewTab(tabName, tabImage)
     tabName = tabName or "Tab"
-    tabImage = tabImage or "rbxassetid://1234567890"
+    tabImage = tabImage or "rbxassetid://"
     
     local tabButton = Instance.new("TextButton")
     local UICorner = Instance.new("UICorner")
@@ -391,7 +391,7 @@ function Kavo.CreateLib(kavName, themeList)
     tabImageLabel.Name = "TabImage"
     tabImageLabel.Parent = tabButton
     tabImageLabel.BackgroundTransparency = 1
-    tabImageLabel.Position = UDim2.new(0, 8, 0, 4)
+    tabImageLabel.Position = UDim2.new(0, 4, 0, 4)
     tabImageLabel.Size = UDim2.new(0, 20, 0, 20)
     tabImageLabel.Image = tabImage
     tabImageLabel.ImageColor3 = themeList.TextColor
@@ -402,7 +402,7 @@ function Kavo.CreateLib(kavName, themeList)
     page.Active = true
     page.BackgroundColor3 = themeList.Background
     page.BorderSizePixel = 0
-    page.Position = UDim2.new(0, 0, -0.00371747208, 0)
+    page.Position = UDim2.new(0, 0, -0.00371748208, 0)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.ScrollBarThickness = 5
     page.Visible = false
@@ -455,13 +455,12 @@ function Kavo.CreateLib(kavName, themeList)
             if v:IsA("TextButton") then
                 if themeList.SchemeColor == Color3.fromRGB(255,255,255) then
                     Utility:TweenObject(v, {TextColor3 = Color3.fromRGB(255,255,255)}, 0.2)
-                end 
+                end
                 if themeList.SchemeColor == Color3.fromRGB(0,0,0) then
                     Utility:TweenObject(v, {TextColor3 = Color3.fromRGB(0,0,0)}, 0.2)
                 end 
                 Utility:TweenObject(v, {BackgroundTransparency = 1}, 0.2)
                 
-                -- إعادة تعيين لون الصورة للتبويب غير النشط
                 local image = v:FindFirstChild("TabImage")
                 if image then
                     Utility:TweenObject(image, {ImageColor3 = themeList.TextColor}, 0.2)
@@ -469,7 +468,6 @@ function Kavo.CreateLib(kavName, themeList)
             end
         end
         
-        -- تغيير لون الصورة للتبويب النشط
         if themeList.SchemeColor == Color3.fromRGB(255,255,255) then
             Utility:TweenObject(tabButton, {TextColor3 = Color3.fromRGB(0,0,0)}, 0.2)
             Utility:TweenObject(tabImageLabel, {ImageColor3 = Color3.fromRGB(0,0,0)}, 0.2)
