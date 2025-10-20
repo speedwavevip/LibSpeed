@@ -1307,7 +1307,7 @@ function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, startVal, call
 
     sliderBtn.Name = "sliderBtn"
     sliderBtn.Parent = sliderElement
-    sliderBtn.BackgroundColor3 = Color3.fromRGB(themeList.ElementColor.r * 255 + 5, themeList.ElementColor.g * 255 + 5, themeList.ElementColor.b * 255  + 5)
+    sliderBtn.BackgroundColor3 = Color3.fromRGB(themeList.ElementColor.r * 255 + 5, themeList.ElementColor.g * 255 + 5, themeList.ElementColor.b * 255 + 5)
     sliderBtn.BorderSizePixel = 0
     sliderBtn.Position = UDim2.new(0.488749951, 0, 0.393939406, 0)
     sliderBtn.Size = UDim2.new(0, 149, 0, 6)
@@ -1317,6 +1317,7 @@ function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, startVal, call
     sliderBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
     sliderBtn.TextSize = 14.000
 
+    UICorner_2.CornerRadius = UDim.new(0, 4)
     UICorner_2.Parent = sliderBtn
 
     UIListLayout.Parent = sliderBtn
@@ -1326,17 +1327,16 @@ function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, startVal, call
     sliderDrag.Name = "sliderDrag"
     sliderDrag.Parent = sliderBtn
     sliderDrag.BackgroundColor3 = themeList.SchemeColor
-    sliderDrag.BorderColor3 = Color3.fromRGB(74, 99, 135)
     sliderDrag.BorderSizePixel = 0
     sliderDrag.Size = UDim2.new((startVal - minvalue) / (maxvalue - minvalue), 0, 1, 0)
 
+    UICorner_3.CornerRadius = UDim.new(0, 4)
     UICorner_3.Parent = sliderDrag
 
     write.Name = "write"
     write.Parent = sliderElement
     write.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     write.BackgroundTransparency = 1.000
-    write.BorderColor3 = Color3.fromRGB(27, 42, 53)
     write.Position = UDim2.new(0.0199999996, 0, 0.180000007, 0)
     write.Size = UDim2.new(0, 21, 0, 21)
     write.Image = "rbxassetid://3926307971"
@@ -1358,7 +1358,7 @@ function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, startVal, call
     val.TextXAlignment = Enum.TextXAlignment.Right
 
     local moreInfo = Instance.new("TextLabel")
-    local UICorner = Instance.new("UICorner")
+    local UICorner_4 = Instance.new("UICorner")
 
     moreInfo.Name = "TipMore"
     moreInfo.Parent = infoContainer
@@ -1373,8 +1373,8 @@ function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, startVal, call
     moreInfo.RichText = true
     moreInfo.TextXAlignment = Enum.TextXAlignment.Left
 
-    UICorner.CornerRadius = UDim.new(0, 4)
-    UICorner.Parent = moreInfo
+    UICorner_4.CornerRadius = UDim.new(0, 4)
+    UICorner_4.Parent = moreInfo
 
     if themeList.SchemeColor == Color3.fromRGB(255,255,255) then
         Utility:TweenObject(moreInfo, {TextColor3 = Color3.fromRGB(0,0,0)}, 0.2)
@@ -1383,29 +1383,34 @@ function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, startVal, call
         Utility:TweenObject(moreInfo, {TextColor3 = Color3.fromRGB(255,255,255)}, 0.2)
     end 
 
-    updateSectionFrame()
-    UpdateSize()
+    if updateSectionFrame then
+        updateSectionFrame()
+    end
     
-    local mouse = game:GetService("Players").LocalPlayer:GetMouse();
-    local ms = game.Players.LocalPlayer:GetMouse()
+    if UpdateSize then
+        UpdateSize()
+    end
+    
+    local mouse = game:GetService("Players").LocalPlayer:GetMouse()
     local uis = game:GetService("UserInputService")
     local btn = sliderElement
     local infBtn = viewInfo
     local hovering = false
+    local focusing = false
+    local viewDe = false
     
     local function UpdateSliderValue(value)
         value = math.clamp(value, minvalue, maxvalue)
         local percentage = (value - minvalue) / (maxvalue - minvalue)
         
         sliderDrag.Size = UDim2.new(percentage, 0, 1, 0)
-        val.Text = tostring(value)
+        val.Text = tostring(math.floor(value))
         
         pcall(function()
             callback(value)
         end)
     end
 
-    -- تعيين القيمة الابتدائية
     UpdateSliderValue(startVal)
 
     btn.MouseEnter:Connect(function()
@@ -1424,10 +1429,10 @@ function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, startVal, call
             }):Play()
             hovering = false
         end
-    end)        
+    end)
 
-    coroutine.wrap(function()
-        while wait() do
+    local updateColors = coroutine.create(function()
+        while wait(0.1) do
             if not hovering then
                 sliderElement.BackgroundColor3 = themeList.ElementColor
             end
@@ -1437,45 +1442,62 @@ function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, startVal, call
             write.ImageColor3 = themeList.SchemeColor
             togName.TextColor3 = themeList.TextColor
             viewInfo.ImageColor3 = themeList.SchemeColor
-            sliderBtn.BackgroundColor3 = Color3.fromRGB(themeList.ElementColor.r * 255 + 5, themeList.ElementColor.g * 255 + 5, themeList.ElementColor.b * 255  + 5)
+            sliderBtn.BackgroundColor3 = Color3.fromRGB(themeList.ElementColor.r * 255 + 5, themeList.ElementColor.g * 255 + 5, themeList.ElementColor.b * 255 + 5)
             sliderDrag.BackgroundColor3 = themeList.SchemeColor
         end
-    end)()
+    end)
+    coroutine.resume(updateColors)
 
-    local Value
     sliderBtn.MouseButton1Down:Connect(function()
         if not focusing then
-            Value = math.floor((((tonumber(maxvalue) - tonumber(minvalue)) / 149) * sliderDrag.AbsoluteSize.X) + tonumber(minvalue)) or 0
+            local sliderDragAbsoluteX = sliderDrag.AbsoluteSize.X
+            local currentValue = math.floor((((tonumber(maxvalue) - tonumber(minvalue)) / 149) * sliderDragAbsoluteX) + tonumber(minvalue)) or 0
+            
             pcall(function()
-                callback(Value)
+                callback(currentValue)
             end)
             
             local moveconnection = mouse.Move:Connect(function()
-                val.Text = Value
-                Value = math.floor((((tonumber(maxvalue) - tonumber(minvalue)) / 149) * sliderDrag.AbsoluteSize.X) + tonumber(minvalue))
+                local xOffset = math.clamp(mouse.X - sliderDrag.AbsolutePosition.X, 0, 149)
+                currentValue = math.floor((((tonumber(maxvalue) - tonumber(minvalue)) / 149) * xOffset) + tonumber(minvalue))
+                
+                val.Text = tostring(currentValue)
                 pcall(function()
-                    callback(Value)
+                    callback(currentValue)
                 end)
-                sliderDrag:TweenSize(UDim2.new(0, math.clamp(mouse.X - sliderDrag.AbsolutePosition.X, 0, 149), 0, 6), "InOut", "Linear", 0.05, true)
+                
+                sliderDrag.Size = UDim2.new(xOffset / 149, 0, 1, 0)
             end)
             
-            local releaseconnection = uis.InputEnded:Connect(function(Mouse)
-                if Mouse.UserInputType == Enum.UserInputType.MouseButton1 then
-                    Value = math.floor((((tonumber(maxvalue) - tonumber(minvalue)) / 149) * sliderDrag.AbsoluteSize.X) + tonumber(minvalue))
+            local releaseconnection
+            releaseconnection = uis.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    local xOffset = math.clamp(mouse.X - sliderDrag.AbsolutePosition.X, 0, 149)
+                    currentValue = math.floor((((tonumber(maxvalue) - tonumber(minvalue)) / 149) * xOffset) + tonumber(minvalue))
+                    
                     pcall(function()
-                        callback(Value)
+                        callback(currentValue)
                     end)
-                    val.Text = Value
-                    moveconnection:Disconnect()
-                    releaseconnection:Disconnect()
+                    val.Text = tostring(currentValue)
+                    
+                    if moveconnection then
+                        moveconnection:Disconnect()
+                    end
+                    if releaseconnection then
+                        releaseconnection:Disconnect()
+                    end
                 end
             end)
         else
             for i,v in next, infoContainer:GetChildren() do
-                Utility:TweenObject(v, {Position = UDim2.new(0,0,2,0)}, 0.2)
+                if Utility and Utility.TweenObject then
+                    Utility:TweenObject(v, {Position = UDim2.new(0,0,2,0)}, 0.2)
+                end
                 focusing = false
             end
-            Utility:TweenObject(blurFrame, {BackgroundTransparency = 1}, 0.2)
+            if Utility and Utility.TweenObject and blurFrame then
+                Utility:TweenObject(blurFrame, {BackgroundTransparency = 1}, 0.2)
+            end
         end
     end)
     
@@ -1483,18 +1505,31 @@ function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, startVal, call
         if not viewDe then
             viewDe = true
             focusing = true
+            
             for i,v in next, infoContainer:GetChildren() do
-                if v ~= moreInfo then
+                if v ~= moreInfo and Utility and Utility.TweenObject then
                     Utility:TweenObject(v, {Position = UDim2.new(0,0,2,0)}, 0.2)
                 end
             end
-            Utility:TweenObject(moreInfo, {Position = UDim2.new(0,0,0,0)}, 0.2)
-            Utility:TweenObject(blurFrame, {BackgroundTransparency = 0.5}, 0.2)
-            Utility:TweenObject(btn, {BackgroundColor3 = themeList.ElementColor}, 0.2)
+            
+            if Utility and Utility.TweenObject then
+                Utility:TweenObject(moreInfo, {Position = UDim2.new(0,0,0,0)}, 0.2)
+                if blurFrame then
+                    Utility:TweenObject(blurFrame, {BackgroundTransparency = 0.5}, 0.2)
+                end
+                Utility:TweenObject(btn, {BackgroundColor3 = themeList.ElementColor}, 0.2)
+            end
+            
             wait(1.5)
             focusing = false
-            Utility:TweenObject(moreInfo, {Position = UDim2.new(0,0,2,0)}, 0.2)
-            Utility:TweenObject(blurFrame, {BackgroundTransparency = 1}, 0.2)
+            
+            if Utility and Utility.TweenObject then
+                Utility:TweenObject(moreInfo, {Position = UDim2.new(0,0,2,0)}, 0.2)
+                if blurFrame then
+                    Utility:TweenObject(blurFrame, {BackgroundTransparency = 1}, 0.2)
+                end
+            end
+            
             wait(0)
             viewDe = false
         end
